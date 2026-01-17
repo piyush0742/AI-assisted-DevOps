@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: 129257837177.dkr.ecr.us-east-1.amazonaws.com/payment-service:v3
+        image: 294382260583.dkr.ecr.us-east-1.amazonaws.com/payment-service:v3
 
         ports:
         - name: http

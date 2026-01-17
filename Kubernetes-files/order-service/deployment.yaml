@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: 129257837177.dkr.ecr.us-east-1.amazonaws.com/order-service:v3
+        image: 294382260583.dkr.ecr.us-east-1.amazonaws.com/order-service:v3
 
         ports:
         - name: http

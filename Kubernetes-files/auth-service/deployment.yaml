@@ -24,12 +24,12 @@ spec:
     spec:
       containers:
       - name: auth-service
-        image: 129257837177.dkr.ecr.us-east-1.amazonaws.com/cloud-finops:v1.0
+        image: 294382260583.dkr.ecr.us-east-1.amazonaws.com/cloud-finops:v1.0
 
         ports:
         - name: http
           containerPort: 8080
-        - name: /metrics
+        - name: metrics
           containerPort: 8001
 
         securityContext:

@@ -4,7 +4,7 @@ metadata:
   name: auth-service
   namespace: monitoring
   labels:
-    release: monitoring
+    release: kube-prometheus-stack
 spec:
   selector:
     matchLabels:
@@ -13,6 +13,6 @@ spec:
     matchNames:
     - auth-ns
   endpoints:
-  - port: metrics
-    path: /metrics
+  - path: /metrics
+    port: http
     interval: 30s
