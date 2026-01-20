@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class LLMClient(ABC):
+class BaseLLM(ABC):
     @abstractmethod
     def summarize(self, text: str) -> str:
         pass
