@@ -14,5 +14,5 @@ spec:
     - auth-ns
   endpoints:
   - path: /metrics
-    port: metrics
+    port: http
     interval: 30s
