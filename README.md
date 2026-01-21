@@ -1,202 +1,207 @@
-# Cloud Observability & FinOps on AWS EKS
+# AI‑Powered Cloud Observability & FinOps on AWS EKS
 
-📌 Project Overview
+This project demonstrates a **production‑style cloud observability platform** built on **AWS EKS**, enhanced with **AI‑driven log summarization and incident explanation**. It combines **Terraform‑based infrastructure**, **microservices**, **Grafana/Prometheus monitoring**, and **local + cloud LLMs** (LLaMA 3, OpenAI, Bedrock‑ready).
 
-This project demonstrates a production-grade Cloud Observability & FinOps setup built on AWS EKS, following real-world DevOps/SRE best practices.
-We designed, deployed, and debugged a microservices-based architecture with end-to-end observability, cost awareness**, and secure ingress routing.
-
-The project covers:
-
-* Microservices deployment on EKS
-* AWS ALB Ingress Controller
-* OpenTelemetry-based tracing
-* Prometheus metrics scraping
-* Grafana dashboards
-* Terraform-based infrastructure provisioning
-* Cost & governance-ready structure
+The goal is to keep and eye on the cost usage with granular monitoring and reduce **alert fatigue** and **mean time to understanding (MTTU)** by letting AI explain *what went wrong* in Kubernetes workloads
 
 ---
 
-🏗️ Architecture Summary
+## High‑Level Architecture
 
-Services:
+* **AWS EKS** (managed Kubernetes)
+* **Terraform** for infra provisioning
+* **Microservices**: auth, order, payment
+* **Docker + ECR** per service
+* **Prometheus + Grafana** behind **ALB Ingress**
+* **Fluent Bit + CloudWatch Logs**
+* **AI Observability Service** (FastAPI)
+* **LLM Providers**:
 
-* `auth-service`
-* `order-service`
-* `payment-service`
-
-Traffic Flow:
-
-```
-User → ALB (Ingress) → Kubernetes Service → Pod (FastAPI)
-```
-
-Observability Flow:
-
-```
-FastAPI → OpenTelemetry → Metrics & Traces → Prometheus → Grafana
-```
+  * LLaMA 3 (local via Ollama)
+  * OpenAI GPT (pluggable)
+  * AWS Bedrock (future‑ready)
 
 ---
 
-📂 Repository Structure
+## Repository Structure
 
 ```
 cloud-observability-finops/
 │
-├── services/                  # Application source code
+├── ai-observability/          # AI log analysis service
+│   ├── app/
+│   │   ├── main.py            # FastAPI entrypoint
+│   │   ├── services/
+│   │   │   └── summarizer.py  # LLM selector + orchestration
+│   │   ├── llm/
+│   │   │   ├── base.py        # Abstract LLM interface
+│   │   │   ├── llama.py       # LLaMA 3 client (Ollama)
+│   │   │   └── openai.py      # OpenAI client
+│   │   └── models/
+│   ├── scripts/
+│   │   └── log-feeder.py      # Fetch K8s logs → AI
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── services/                  # Microservices
 │   ├── auth-service/
 │   ├── order-service/
 │   └── payment-service/
 │
-├── Kubernetes-files/          # K8s manifests
-│   ├── auth-service/
-│   ├── order-service/
-│   └── payment-service/
-│
-├── terraform/                 # EKS infrastructure
-│   └── eks/
-│
-├── observability/             # Dashboards & configs
-├── docs/                      # Architecture & design docs
-├── governance/                # Governance placeholders
-├── finops/                    # FinOps placeholders
+├── observability/             # Prometheus, Grafana manifests
+├── Kubernetes-files/          # App deployments & services
+├── terraform/                 # EKS, nodegroups, IAM, ALB
 └── README.md
 ```
 
 ---
 
-🚀 Application Stack
+## AI Observability – How It Works
 
-Backend
+1. **Logs are collected** from Kubernetes pods using `kubectl logs` (local) or Fluent Bit (cloud)
+2. Logs are sent to a **FastAPI AI service**
+3. The service selects an LLM via abstraction (`BaseLLM`)
+4. The LLM:
 
-* FastAPI (Python)
-* Dockerized services
-* Health, metrics & business APIs
+   * Summarizes the incident
+   * Explains root cause
+   * Suggests next steps (SRE‑style)
 
-Kubernetes
+Example output:
 
-* Namespaces per service
-* Deployments & Services
-* ALB Ingress Controller
-
-AWS
-
-* EKS Cluster (Terraform)
-* ALB (Application Load Balancer)
-* IAM Roles & Policies
+> "Order service pod is restarting due to failed liveness probes. This likely indicates application startup delays or memory pressure. Check container resource limits and health check thresholds."
 
 ---
 
-🔍 Observability
+## LLM Abstraction Design
 
-1️⃣ Metrics (Prometheus)
+```text
+BaseLLM (abstract)
+ ├── summarize(logs)
+ └── explain_error(logs)
 
-Each service exposes:
+LlamaClient (Ollama)
+OpenAIClient (API)
+BedrockClient (planned)
+```
 
-* `/metrics` endpoint
-* Request count
-* Latency
-* Error rates
-
-Prometheus scrapes metrics using:
-
-* `ServiceMonitor` per service
-
----
-
-2️⃣ Distributed Tracing (OpenTelemetry)
-
-Implemented using:
-
-* OpenTelemetry SDK
-* Auto-instrumented FastAPI spans
-
-Tracked:
-
-* API latency
-* Error spans
-* Service-level traces
+This design allows **switching LLMs without changing application logic**.
 
 ---
 
-3️⃣ Grafana Dashboards
+## Local Setup (AI Service)
 
-Grafana dashboards include:
+### 1. Start LLaMA 3 locally
 
-📊 Service Overview Dashboard**
+```bash
+brew install ollama
+ollama serve
+ollama run llama3
+```
 
-* Requests per second (RPS)
-* P95 / P99 latency
-* Error rate (%)
+### 2. Setup Python environment
 
-📊 Pod & Namespace Metrics**
+```bash
+cd ai-observability
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-* CPU usage
-* Memory usage
-* Pod restarts
+### 3. Run AI API
 
-📊 Ingress Metrics**
+```bash
+export LLM_PROVIDER=llama
+uvicorn app.main:app --reload
+```
 
-* ALB request count
-* HTTP status codes
-* Target health
+### 4. Test API
 
-Dashboards are:
-
-* Namespace-aware
-* Service-specific
-* Production-ready
-
----
-
-🌐 Ingress & Routing
-
-Implemented using **AWS ALB Ingress Controller**.
-
-Path-based routing:
-
-| Path         | Service         |
-| ------------ | --------------- |
-| `/login`     | auth-service    |
-| `/order/*`   | order-service   |
-| `/payment/*` | payment-service |
+```bash
+curl -X POST http://127.0.0.1:8000/summarize \
+  -H "Content-Type: application/json" \
+  -d '{"logs":"Order service pod is restarting due to liveness probe failure"}'
+```
 
 ---
 
+## Feeding Kubernetes Logs to AI
 
-💰 FinOps Readiness
+Use the **log-feeder script**:
 
-* Cost tags defined in Terraform
-* Namespace-level cost attribution possible
-* Ready for Kubecost / CUR integration
+```bash
+python3 scripts/log-feeder.py
+```
 
----
+What it does:
 
-🔐 Governance & Security
+* Finds pods for application services
+* Fetches recent logs
+* Sends logs to AI service
+* Prints summarized incident
 
-* IAM least privilege policies
-* Namespace isolation
-* Ingress controlled exposure
+This can be:
 
----
-
-🎯 Key Learnings
-
-* Ingress routing ≠ NGINX rewrite
-* Health checks are CRITICAL
-* Observability must be built-in, not added later
-* Logs + Metrics + Traces = Faster debugging
-* Infra & App teams must align
+* Scheduled (cronjob)
+* Triggered by alerts
+* Converted into a Kubernetes Job
 
 ---
 
-🧠 Next Enhancements
+## Observability Stack
 
-* Alerting (Alertmanager)
-* SLO-based dashboards
-* Cost dashboards (Kubecost)
-* Canary deployments
-* CI/CD pipelines
+* **Prometheus** – metrics collection
+* **Grafana** – dashboards & alerts
+* **ALB Ingress** – secure access (no port‑forwarding)
+* **Separate ALB** for monitoring (best practice)
+
+Grafana + Prometheus run independently from application ALB.
 
 ---
+
+## FinOps & Cost Awareness
+
+* Right‑sized node groups
+* Avoided over‑provisioning
+* Local LLM for zero inference cost
+* Optional switch to Bedrock/OpenAI
+
+---
+
+## Security Considerations
+
+* IAM least privilege
+* Separate ALBs
+* No public access to metrics endpoints
+* Future: IRSA for AI + logging components
+
+---
+
+## What Makes This Project Different
+
+✔ Real‑world EKS setup (not minikube)
+✔ AI used for **incident understanding**
+✔ LLM‑agnostic design
+✔ SRE‑focused outcomes
+✔ Recruiter‑friendly, interview‑ready architecture
+
+---
+
+## Next Phases
+
+* Streaming logs → AI (near‑real‑time)
+* Alert → AI explanation in Grafana
+* Bedrock integration
+* Security hardening & threat modeling
+
+---
+
+## Author
+
+**Piyush Panchal**
+DevOps | SRE | Platform Engineering
+AWS • Kubernetes • Observability • AI
+
+---
+
+⭐ If you find this useful, feel free to star the repo or reach out on LinkedIn.
