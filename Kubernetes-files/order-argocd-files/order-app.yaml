@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/piyush0742/AI-assisted-DevOps.git
     targetRevision: main
-    path: Kubernetes-files/order-argocd-files
+    path: Kubernetes-files/order-service
 
   destination:
     server: https://kubernetes.default.svc

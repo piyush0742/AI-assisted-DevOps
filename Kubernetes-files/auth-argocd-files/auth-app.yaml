@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/piyush0742/AI-assisted-DevOps.git
     targetRevision: main
-    path: Kubernetes-files/auth-argocd-files
+    path: Kubernetes-files/auth-service
 
   destination:
     server: https://kubernetes.default.svc
