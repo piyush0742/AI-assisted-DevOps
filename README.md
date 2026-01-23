@@ -179,19 +179,19 @@ Grafana + Prometheus run independently from application ALB.
 
 ## What Makes This Project Different
 
-✔ Real‑world EKS setup (not minikube)
+✔ Real‑world Automated EKS setup
 ✔ AI used for **incident understanding**
 ✔ LLM‑agnostic design
 ✔ SRE‑focused outcomes
-✔ Recruiter‑friendly, interview‑ready architecture
 
 ---
 
 ## Next Phases
 
+* Convert it into GitOps model, CI/CD using GtiHb Actions and Argo CD
 * Streaming logs → AI (near‑real‑time)
 * Alert → AI explanation in Grafana
-* Bedrock integration
+* Bedrock/Open AI integration
 * Security hardening & threat modeling
 
 ---
@@ -205,3 +205,4 @@ AWS • Kubernetes • Observability • AI
 ---
 
 ⭐ If you find this useful, feel free to star the repo or reach out on LinkedIn.
+
